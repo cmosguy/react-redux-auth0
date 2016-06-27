@@ -16,7 +16,7 @@ import expressJwt from 'express-jwt';
 import expressGraphQL from 'express-graphql';
 import jwt from 'jsonwebtoken';
 import ReactDOM from 'react-dom/server';
-import UniversalRouter from 'universal-router';
+import { match } from 'universal-router';
 import PrettyError from 'pretty-error';
 import passport from './core/passport';
 import models from './data/models';
@@ -24,6 +24,8 @@ import schema from './data/schema';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
 import { port, auth, analytics } from './config';
+import configureStore from './store/configureStore';
+import { setRuntimeVariable } from './actions/runtime';
 
 const app = express();
 
@@ -91,19 +93,28 @@ app.get('*', async (req, res, next) => {
       data.trackingId = analytics.google.trackingId;
     }
 
-    await UniversalRouter.resolve(routes, {
+    const store = configureStore({}, {
+      cookie: req.headers.cookie,
+    });
+
+    store.dispatch(setRuntimeVariable({
+      name: 'initialNow',
+      value: Date.now(),
+    }));
+
+    await match(routes, {
       path: req.path,
       query: req.query,
       context: {
-        insertCss: (...styles) => {
-          styles.forEach(style => css.push(style._getCss())); // eslint-disable-line no-underscore-dangle, max-len
-        },
+        store,
+        insertCss: styles => css.push(styles._getCss()), // eslint-disable-line no-underscore-dangle
         setTitle: value => (data.title = value),
         setMeta: (key, value) => (data[key] = value),
       },
       render(component, status = 200) {
         css = [];
         statusCode = status;
+        data.state = JSON.stringify(store.getState());
         data.body = ReactDOM.renderToString(component);
         data.css = css.join('');
         return true;

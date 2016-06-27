@@ -10,24 +10,15 @@
 import 'babel-polyfill';
 import ReactDOM from 'react-dom';
 import FastClick from 'fastclick';
-import UniversalRouter from 'universal-router';
+import { match } from 'universal-router';
 import routes from './routes';
 import history from './core/history';
-import { readState, saveState } from 'history/lib/DOMStateStorage';
-import {
-  addEventListener,
-  removeEventListener,
-  windowScrollX,
-  windowScrollY,
-} from './core/DOMUtils';
+import configureStore from './store/configureStore';
+import { addEventListener, removeEventListener } from './core/DOMUtils';
 
 const context = {
-  insertCss: (...styles) => {
-    const removeCss = styles.map(style => style._insertCss()); // eslint-disable-line no-underscore-dangle, max-len
-    return () => {
-      removeCss.forEach(f => f());
-    };
-  },
+  store: null,
+  insertCss: styles => styles._insertCss(), // eslint-disable-line no-underscore-dangle
   setTitle: value => (document.title = value),
   setMeta: (name, content) => {
     // Remove and create a new <meta /> tag in order to make it work
@@ -86,52 +77,51 @@ function render(container, state, component) {
 }
 
 function run() {
+  let currentLocation = null;
   const container = document.getElementById('app');
-  let currentLocation = history.getCurrentLocation();
+  const initialState = JSON.parse(
+    document.
+      getElementById('source').
+      getAttribute('data-initial-state')
+  );
 
   // Make taps on links and buttons work fast on mobiles
   FastClick.attach(document.body);
 
-  // Re-render the app when window.location changes
-  function onLocationChange(location) {
-    // Save the page scroll position into the current location's state
-    if (currentLocation.key) {
-      saveState(currentLocation.key, {
-        ...readState(currentLocation.key),
-        scrollX: windowScrollX(),
-        scrollY: windowScrollY(),
-      });
-    }
-    currentLocation = location;
+  context.store = configureStore(initialState, {});
 
-    UniversalRouter.resolve(routes, {
+  // Re-render the app when window.location changes
+  const removeHistoryListener = history.listen(location => {
+    currentLocation = location;
+    match(routes, {
       path: location.pathname,
       query: location.query,
       state: location.state,
       context,
       render: render.bind(undefined, container, location.state),
     }).catch(err => console.error(err)); // eslint-disable-line no-console
-  }
+  });
 
-  // Add History API listener and trigger initial change
-  const removeHistoryListener = history.listen(onLocationChange);
-  history.replace(currentLocation);
-
-  // https://developers.google.com/web/updates/2015/09/history-api-scroll-restoration
-  let originalScrollRestoration;
-  if (window.history && 'scrollRestoration' in window.history) {
-    originalScrollRestoration = window.history.scrollRestoration;
-    window.history.scrollRestoration = 'manual';
-  }
-
-  // Prevent listeners collisions during history navigation
-  addEventListener(window, 'pagehide', function onPageHide() {
-    removeEventListener(window, 'pagehide', onPageHide);
-    removeHistoryListener();
-    if (originalScrollRestoration) {
-      window.history.scrollRestoration = originalScrollRestoration;
-      originalScrollRestoration = undefined;
+  // Save the page scroll position into the current location's state
+  const supportPageOffset = window.pageXOffset !== undefined;
+  const isCSS1Compat = ((document.compatMode || '') === 'CSS1Compat');
+  const setPageOffset = () => {
+    currentLocation.state = currentLocation.state || Object.create(null);
+    if (supportPageOffset) {
+      currentLocation.state.scrollX = window.pageXOffset;
+      currentLocation.state.scrollY = window.pageYOffset;
+    } else {
+      currentLocation.state.scrollX = isCSS1Compat ?
+        document.documentElement.scrollLeft : document.body.scrollLeft;
+      currentLocation.state.scrollY = isCSS1Compat ?
+        document.documentElement.scrollTop : document.body.scrollTop;
     }
+  };
+
+  addEventListener(window, 'scroll', setPageOffset);
+  addEventListener(window, 'pagehide', () => {
+    removeEventListener(window, 'scroll', setPageOffset);
+    removeHistoryListener();
   });
 }
 
