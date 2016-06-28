@@ -12,8 +12,14 @@ import cx from 'classnames';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Navigation.css';
 import Link from '../Link';
+import Login from '../Login';
 
-function Navigation({ className }) {
+function Navigation({ className, dispatch, isAuthenticated, errorMessage }) {
+    // const { dispatch, isAuthenticated, errorMessage } = this.props;
+    console.log('navigation');
+    // console.log(context);
+    console.log(isAuthenticated === true);
+    console.log(errorMessage);
   return (
     <div className={cx(s.root, className)} role="navigation">
       <Link className={s.link} to="/about">About</Link>
@@ -22,6 +28,12 @@ function Navigation({ className }) {
       <Link className={s.link} to="/login">Log in</Link>
       <span className={s.spacer}>or</span>
       <Link className={cx(s.link, s.highlight)} to="/register">Sign up</Link>
+
+        <Login
+            errorMessage={errorMessage}
+            onLoginClick={ () => dispatch(login()) }
+        />
+
     </div>
   );
 }

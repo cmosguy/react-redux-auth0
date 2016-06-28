@@ -58,10 +58,17 @@ class App extends Component {
     }
 
     const store = this.props.context.store;
+    // const { dispatch, quote, isAuthenticated, errorMessage, isSecretQuote } = this.props;
+    // console.log(this.props);
+    // console.log('isAuthenicated: ' + isAuthenticated);
     return (
       <Provider store={store}>
         <div>
-          <Header />
+          <Header
+              // isAuthenticated={isAuthenticated}
+              // errorMessage={errorMessage}
+              // dispatch={dispatch}
+          />
           {this.props.children}
           <Feedback />
           <Footer />

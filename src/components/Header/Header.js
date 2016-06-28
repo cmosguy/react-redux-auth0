@@ -14,11 +14,15 @@ import Link from '../Link';
 import Navigation from '../Navigation';
 import logoUrl from './logo-small.png';
 
-function Header() {
+function Header(dispatch, isAuthenticated, errorMessage) {
   return (
     <div className={s.root}>
       <div className={s.container}>
-        <Navigation className={s.nav} />
+        <Navigation className={s.nav}
+                    // isAuthenticated={isAuthenticated}
+                    // errorMessage={errorMessage}
+                    // dispatch={dispatch}
+        />
         <Link className={s.brand} to="/">
           <img src={logoUrl} width="38" height="38" alt="React" />
           <span className={s.brandTxt}>Your Company</span>
