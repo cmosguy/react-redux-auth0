@@ -1,9 +1,8 @@
 import { combineReducers } from 'redux';
 import runtime from './runtime';
-import { auth, quotes } from './authenticate';
+import intl from './intl';
 
 export default combineReducers({
   runtime,
-  auth,
-  quotes
+  intl,
 });
