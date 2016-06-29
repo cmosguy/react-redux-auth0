@@ -1,31 +1,36 @@
-import React, { Component, PropTypes } from 'react';
+import React, {Component, PropTypes} from 'react';
+import { login } from '../../actions/authenticate';
 
 class Login extends Component {
-  
-  render() {
-    const { errorMessage } = this.props;
-    
-    return (
-      <div>
-        <button onClick={(event) => this.handleClick(event)} className="btn btn-primary">
-          Login
-        </button>
-        
-        {errorMessage &&
-          <p style={{color:'red'}}>{errorMessage}</p>
-        }
-      </div>
-    )
-  }
-  
-  handleClick(event) {
-    this.props.onLoginClick()
-  }
+
+    static propTypes = {
+        login: PropTypes.func.isRequired,
+        errorMessage: PropTypes.string,
+        isFetching: state.auth.isFetching,
+        isAuthenticated: state.auth.isAuthenticated,
+    };
+
+    render() {
+        const { login, errorMessage } = this.props;
+
+        return (
+            <div>
+                <button onClick={login} className="btn btn-primary">
+                    Login
+                </button>
+
+                {errorMessage &&
+                <p style={{color:'red'}}>{errorMessage}</p>
+                }
+            </div>
+        )
+    }
 }
 
-Login.propTypes = {
-  onLoginClick: PropTypes.func.isRequired,
-  errorMessage: PropTypes.string
-};
-
-export default Login;
+export default connect(state => ({
+    isFetching: state.auth.isFetching,
+    isAuthenticated: state.auth.isAuthenticated,
+    errorMessage: state.auth.errorMessage
+}), {
+    login,
+})(Login);

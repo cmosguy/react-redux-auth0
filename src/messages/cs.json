@@ -3,72 +3,48 @@
     "id": "header.banner.desc",
     "defaultMessage": "Complex web apps made easy",
     "message": "Komplexní aplikace jednodušše",
-    "description": "Description in header",
-    "files": [
-      "src/components/Header/Header.js"
-    ]
+    "description": "Description in header"
   },
   {
     "id": "header.banner.title",
     "defaultMessage": "React",
     "message": "React",
-    "description": "Title in page header",
-    "files": [
-      "src/components/Header/Header.js"
-    ]
+    "description": "Title in page header"
   },
   {
     "id": "header.brand",
     "defaultMessage": "Your Company Brand",
     "message": "Vaše firma",
-    "description": "Brand name displayed in header",
-    "files": [
-      "src/components/Header/Header.js"
-    ]
+    "description": "Brand name displayed in header"
   },
   {
     "id": "navigation.about",
     "defaultMessage": "About",
     "message": "O nás",
-    "description": "About link in header",
-    "files": [
-      "src/components/Navigation/Navigation.js"
-    ]
+    "description": "About link in header"
   },
   {
     "id": "navigation.contact",
     "defaultMessage": "Contact",
     "message": "Kontakt",
-    "description": "Contact link in header",
-    "files": [
-      "src/components/Navigation/Navigation.js"
-    ]
+    "description": "Contact link in header"
   },
   {
     "id": "navigation.login",
     "defaultMessage": "Log in",
     "message": "Přihlásit",
-    "description": "Log in link in header",
-    "files": [
-      "src/components/Navigation/Navigation.js"
-    ]
+    "description": "Log in link in header"
   },
   {
     "id": "navigation.signup",
     "defaultMessage": "Sign up",
     "message": "Registrace",
-    "description": "Sign up link in header",
-    "files": [
-      "src/components/Navigation/Navigation.js"
-    ]
+    "description": "Sign up link in header"
   },
   {
     "id": "navigation.separator.or",
     "defaultMessage": "or",
     "message": "nebo",
-    "description": "Last separator in list, lowercase \"or\"",
-    "files": [
-      "src/components/Navigation/Navigation.js"
-    ]
+    "description": "Last separator in list, lowercase \"or\""
   }
 ]
