@@ -1,7 +1,10 @@
 import {
-  LOCK_SUCCESS,
+  AUTH0_SHOW,
+  AUTH0_OK,
+  AUTH0_ERR,
+  LOGOUT_START,
   LOGOUT_SUCCESS,
-} from '../actions/authenticate';
+} from '../constants';
 
 function getInitialState() {
   let isAuthenticated = false;
@@ -15,6 +18,7 @@ function getInitialState() {
   }
   return {
     isFetching: false,
+    profile: null,
     isAuthenticated,
   };
 }
@@ -24,11 +28,35 @@ function getInitialState() {
 // we would also want a util to check if the token is expired.
 export default function auth(state = getInitialState(), action) {
   switch (action.type) {
-    case LOCK_SUCCESS: {
+    case AUTH0_SHOW: {
+      return {
+        ...state,
+        isFetching: true, // really? Nothing is fetched here...
+        errorMessage: '',
+      };
+    }
+
+    case AUTH0_OK: {
       return {
         ...state,
         isFetching: false,
         isAuthenticated: true,
+        profile: action.payload.profile,
+        errorMessage: '',
+      };
+    }
+
+    case AUTH0_ERR: {
+      return {
+        ...state,
+        errorMessage: action.payload.errorMessage,
+      };
+    }
+
+    case LOGOUT_START: {
+      return {
+        ...state,
+        isFetching: true,
         errorMessage: '',
       };
     }
@@ -36,8 +64,9 @@ export default function auth(state = getInitialState(), action) {
     case LOGOUT_SUCCESS: {
       return {
         ...state,
-        isFetching: true,
+        isFetching: false,
         isAuthenticated: false,
+        errorMessage: '',
       };
     }
 
