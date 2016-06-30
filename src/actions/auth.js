@@ -13,7 +13,7 @@ export function login() {
   // code splitting
   return (dispatch, getState) => {
     require.ensure(['auth0-lock'], require => {
-      const Auth0Lock  = require('auth0-lock');
+      const Auth0Lock = require('auth0-lock');
 
       const lock = new Auth0Lock('xXqbQWihvgXtIECPF6nPzFqWWnfgNOAs', 'adamklein.auth0.com');
       const state = getState();
