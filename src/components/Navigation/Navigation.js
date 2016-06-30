@@ -62,7 +62,7 @@ function Navigation({ className }) {
       <Link className={cx(s.link, s.highlight)} to="/register">
         <FormattedMessage {...messages.signup} />
       </Link>
-        <Login/>
+      <Login />
     </div>
   );
 }
