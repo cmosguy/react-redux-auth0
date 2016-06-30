@@ -4,6 +4,7 @@
     "description": "Description in header",
     "defaultMessage": "Complex web apps made easy",
     "message": "",
+    "description": "Description in header",
     "files": [
       "src/components/Header/Header.js"
     ]
@@ -13,6 +14,7 @@
     "description": "Title in page header",
     "defaultMessage": "React",
     "message": "",
+    "description": "Title in page header",
     "files": [
       "src/components/Header/Header.js"
     ]
@@ -22,6 +24,7 @@
     "description": "Brand name displayed in header",
     "defaultMessage": "Your Company Brand",
     "message": "",
+    "description": "Brand name displayed in header",
     "files": [
       "src/components/Header/Header.js"
     ]
@@ -31,6 +34,7 @@
     "description": "About link in header",
     "defaultMessage": "About",
     "message": "",
+    "description": "About link in header",
     "files": [
       "src/components/Navigation/Navigation.js"
     ]
@@ -40,6 +44,7 @@
     "description": "Contact link in header",
     "defaultMessage": "Contact",
     "message": "",
+    "description": "Contact link in header",
     "files": [
       "src/components/Navigation/Navigation.js"
     ]
@@ -49,6 +54,7 @@
     "description": "Log in link in header",
     "defaultMessage": "Log in",
     "message": "",
+    "description": "Log in link in header",
     "files": [
       "src/components/Navigation/Navigation.js"
     ]
@@ -58,6 +64,7 @@
     "description": "Last separator in list, lowercase \"or\"",
     "defaultMessage": "or",
     "message": "",
+    "description": "Sign up link in header",
     "files": [
       "src/components/Navigation/Navigation.js"
     ]
@@ -67,6 +74,7 @@
     "description": "Sign up link in header",
     "defaultMessage": "Sign up",
     "message": "",
+    "description": "Last separator in list, lowercase \"or\"",
     "files": [
       "src/components/Navigation/Navigation.js"
     ]
