@@ -1,36 +1,33 @@
-import React, {Component, PropTypes} from 'react';
-import { login } from '../../actions/authenticate';
+/* eslint-disable no-shadow */
 
-class Login extends Component {
+import React, { PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { login } from '../../actions/auth';
 
-    static propTypes = {
-        login: PropTypes.func.isRequired,
-        errorMessage: PropTypes.string,
-        isFetching: state.auth.isFetching,
-        isAuthenticated: state.auth.isAuthenticated,
-    };
-
-    render() {
-        const { login, errorMessage } = this.props;
-
-        return (
-            <div>
-                <button onClick={login} className="btn btn-primary">
-                    Login
-                </button>
-
-                {errorMessage &&
-                <p style={{color:'red'}}>{errorMessage}</p>
-                }
-            </div>
-        )
-    }
+function Login({ login, errorMessage }) {
+  return (
+    <div>
+      <button onClick={login} className="btn btn-primary">
+        Login
+      </button>
+      {errorMessage &&
+        <p style={{ color: 'red' }}>{errorMessage}</p>
+      }
+    </div>
+  );
 }
 
+Login.propTypes = {
+  login: PropTypes.func.isRequired,
+  errorMessage: PropTypes.string,
+  isFetching: PropTypes.bool,
+  isAuthenticated: PropTypes.bool,
+};
+
 export default connect(state => ({
-    isFetching: state.auth.isFetching,
-    isAuthenticated: state.auth.isAuthenticated,
-    errorMessage: state.auth.errorMessage
+  isFetching: state.auth.isFetching,
+  isAuthenticated: state.auth.isAuthenticated,
+  errorMessage: state.auth.errorMessage,
 }), {
-    login,
+  login,
 })(Login);

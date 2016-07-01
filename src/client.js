@@ -106,7 +106,7 @@ function run() {
   // Make taps on links and buttons work fast on mobiles
   FastClick.attach(document.body);
 
-  const store = configureStore(initialState);
+  const store = configureStore(initialState, {});
   context.store = store;
 
   // Re-render the app when window.location changes
