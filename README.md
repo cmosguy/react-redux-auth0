@@ -1,5 +1,7 @@
 ## React Starter Kit — "isomorphic" web app boilerplate
 
+[![Join the chat at https://gitter.im/cmosguy/react-redux-auth0](https://badges.gitter.im/cmosguy/react-redux-auth0.svg)](https://gitter.im/cmosguy/react-redux-auth0?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 > [React Starter Kit](https://www.reactstarterkit.com) is an opinionated
 > boilerplate for web development built on top of [Node.js](https://nodejs.org/),
 > [Express](http://expressjs.com/), [GraphQL](http://graphql.org/) and
