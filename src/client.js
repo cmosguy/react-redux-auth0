@@ -19,6 +19,7 @@ import { addEventListener, removeEventListener } from './core/DOMUtils';
 import Provide from './components/Provide';
 
 import { addLocaleData } from 'react-intl';
+import { loadToken } from './actions/auth';
 
 import en from 'react-intl/locale-data/en';
 import cs from 'react-intl/locale-data/cs';
@@ -108,6 +109,10 @@ export default function main() {
 
   const store = configureStore(initialState, {});
   context.store = store;
+
+  if (initialState.auth.isAuthenticated) {
+    store.dispatch(loadToken());
+  }
 
   // Re-render the app when window.location changes
   const removeHistoryListener = history.listen(location => {
