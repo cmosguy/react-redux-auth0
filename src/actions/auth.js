@@ -32,9 +32,14 @@ export function login() {
             },
           });
         } else {
-          if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('profile', JSON.stringify(profile));
-            localStorage.setItem('id_token', token);
+          if (process.env.BROWSER) {
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem('profile', JSON.stringify(profile));
+              localStorage.setItem('id_token', token);
+            }
+            // remember locale for every new request
+            const maxAge = 3650 * 24 * 3600; // 10 years in seconds
+            document.cookie = `auth0=${token};path=/;max-age=${maxAge}`;
           }
           dispatch({
             type: AUTH0_OK,
