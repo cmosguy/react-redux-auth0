@@ -74,7 +74,7 @@ export function login() {
 }
 
 // Logs the user out
-export function logoutUser() {
+export function logout() {
   return dispatch => {
     dispatch({ type: LOGOUT_START });
     if (typeof localStorage !== 'undefined') {

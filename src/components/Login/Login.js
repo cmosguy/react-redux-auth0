@@ -2,14 +2,20 @@
 
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { login } from '../../actions/auth';
+import { login, logout } from '../../actions/auth';
 
-function Login({ login, errorMessage }) {
+function Login({ login, logout, errorMessage, isAuthenticated }) {
   return (
     <div>
-      <button onClick={login} className="btn btn-primary">
-        Login
-      </button>
+      {isAuthenticated ? (
+        <button onClick={logout} className="btn btn-primary">
+          Logout
+        </button>
+      ) : (
+        <button onClick={login} className="btn btn-primary">
+          Login
+        </button>
+      )}
       {errorMessage &&
         <p style={{ color: 'red' }}>{errorMessage}</p>
       }
@@ -19,6 +25,7 @@ function Login({ login, errorMessage }) {
 
 Login.propTypes = {
   login: PropTypes.func.isRequired,
+  logout: PropTypes.func.isRequired,
   errorMessage: PropTypes.string,
   isFetching: PropTypes.bool,
   isAuthenticated: PropTypes.bool,
@@ -30,4 +37,5 @@ export default connect(state => ({
   errorMessage: state.auth.errorMessage,
 }), {
   login,
+  logout,
 })(Login);
