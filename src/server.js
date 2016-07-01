@@ -31,6 +31,7 @@ import configureStore from './store/configureStore';
 import { setRuntimeVariable } from './actions/runtime';
 import Provide from './components/Provide';
 import { setLocale } from './actions/intl';
+import { authOk } from './actions/auth';
 
 const app = express();
 
@@ -135,6 +136,14 @@ app.get('*', async (req, res, next) => {
     await store.dispatch(setLocale({
       locale,
     }));
+
+    // fake successful login on server
+    if (req.cookies.auth0) {
+      store.dispatch(authOk({
+        token: req.cookies.auth0,
+        profile: null,
+      }));
+    }
 
     await match(routes, {
       path: req.path,

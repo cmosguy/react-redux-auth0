@@ -7,8 +7,31 @@ import {
   // LOGOUT_ERROR,
 } from '../constants';
 
-// Opens the Lock widget and
-// dispatches actions along the way
+export function authOk({ token, profile }) {
+  return {
+    type: AUTH0_OK,
+    payload: {
+      token,
+      profile,
+    },
+  };
+}
+
+// Client only: load token and profile after initial render
+export function loadToken() {
+  if (typeof localStorage !== 'undefined') {
+    const token = localStorage.getItem('id_token');
+    const profile = JSON.parse(localStorage.getItem('profile'));
+    return authOk({
+      token,
+      profile,
+    });
+  }
+  // can this happens?
+  return null;
+}
+
+// Client only: Opens the Lock widget and dispatches actions along the way
 export function login() {
   // code splitting
   return (dispatch, getState) => {
@@ -22,7 +45,7 @@ export function login() {
         dict,
       };
       dispatch({ type: AUTH0_SHOW });
-      lock.show(lockOptions, (error, profile, token) => {
+      lock.show(lockOptions, (error, profile, maybeToken) => {
         if (error) {
           dispatch({
             type: AUTH0_ERR,
@@ -32,22 +55,18 @@ export function login() {
             },
           });
         } else {
-          if (process.env.BROWSER) {
-            if (typeof localStorage !== 'undefined') {
-              localStorage.setItem('profile', JSON.stringify(profile));
-              localStorage.setItem('id_token', token);
-            }
-            // remember locale for every new request
-            const maxAge = 3650 * 24 * 3600; // 10 years in seconds
-            document.cookie = `auth0=${token};path=/;max-age=${maxAge}`;
+          const token = maybeToken || profile.idToken;
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('profile', JSON.stringify(profile));
+            localStorage.setItem('id_token', token);
           }
-          dispatch({
-            type: AUTH0_OK,
-            payload: {
-              profile,
-              token,
-            },
-          });
+          // remember locale for every new request
+          const maxAge = 3650 * 24 * 3600; // 10 years in seconds
+          document.cookie = `auth0=${token};path=/;max-age=${maxAge};`;
+          dispatch(authOk({
+            token,
+            profile,
+          }));
         }
       });
     });
@@ -61,6 +80,7 @@ export function logoutUser() {
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem('id_token');
       localStorage.removeItem('profile');
+      document.cookie = 'auth0=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     }
     // TODO: clean session
     dispatch({ type: LOGOUT_SUCCESS });
