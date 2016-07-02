@@ -14,6 +14,7 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Navigation.css';
 import Link from '../Link';
 import Login from '../Login';
+import Me from '../Me';
 
 const messages = defineMessages({
   about: {
@@ -63,6 +64,8 @@ function Navigation({ className }) {
         <FormattedMessage {...messages.signup} />
       </Link>
       <Login />
+      <Me/>
+        
     </div>
   );
 }

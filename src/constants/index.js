@@ -2,6 +2,9 @@
 // You might want to use https://www.npmjs.com/package/react-redux-loading-bar
 // and not using this actions in pair can break this nice utility
 
+export const BASE_URL = 'https://auth0-redux-react.adamklein.io';
+// export const BASE_URL = 'http://auth0example.dev';
+
 export const SET_RUNTIME_VARIABLE = 'SET_RUNTIME_VARIABLE';
 
 // async action
@@ -17,3 +20,8 @@ export const AUTH0_ERR = 'AUTH0_ERR';
 export const LOGOUT_START = 'LOGOUT_START';
 export const LOGOUT_SUCCESS = 'LOGOUT_SUCCESS';
 export const LOGOUT_ERROR = 'LOGOUT_ERROR';
+
+export const ME_REQUEST = 'ME_REQUEST';
+export const ME_SUCCESS = 'ME_SUCCESS';
+export const ME_FAILURE = 'ME_FAILURE';
+

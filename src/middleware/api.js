@@ -1,4 +1,6 @@
-const BASE_URL = 'http://localhost:3001/api/';
+import {
+    BASE_URL
+} from '../constants';
 
 function callApi(endpoint, authenticated, store) {
   
