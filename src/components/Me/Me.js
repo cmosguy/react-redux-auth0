@@ -1,15 +1,16 @@
-import React, { PropTypes } from 'react';
-import { connect } from 'react-redux';
+import React, {PropTypes} from 'react';
+import {connect} from 'react-redux';
+import {setMe} from '../../actions/me';
 
-function Me({ errorMessage, isAuthenticated }) {
-    
+function Me({isAuthenticated, setMe}) {
+
     return (
         <div>
         <pre>
             {JSON.stringify(isAuthenticated)}
         </pre>
             {isAuthenticated &&
-                <p>ME</p>
+            <p>{me.name}</p>
             }
         </div>
     );
@@ -17,11 +18,12 @@ function Me({ errorMessage, isAuthenticated }) {
 
 Me.propTypes = {
     isAuthenticated: PropTypes.bool,
+    setMe: PropTypes.func.isRequired
 };
 
 export default connect(state => ({
     isAuthenticated: state.auth.isAuthenticated,
+    me: state.me.me
 }), {
-    // login,
-    // logout,
+    setMe
 })(Me);

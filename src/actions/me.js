@@ -1,18 +1,51 @@
-import {CALL_API} from '../middleware/api'
-
+import fetch from '../core/fetch';
 import {
-    ME_REQUEST,
-    ME_SUCCESS,
-    ME_FAILURE
-} from '../constants'
+    SET_ME_START,
+    SET_ME_SUCCESS,
+    SET_ME_ERROR,
+    BASE_URL
+} from '../constants';
 
+export function setMe({me}) {
+    return async(dispatch) => {
+        dispatch({
+            type: SET_ME_START,
+            me
+        });
 
-export function fetchMe() {
-    return {
-        [CALL_API]: {
-            endpoint: 'me',
-            isAuthenticated: true,
-            types: [ME_REQUEST, ME_SUCCESS, ME_FAILURE]
+        try {
+            const token = localStorage.getItem('id_token');
+            console.log('about to fetch /me');
+            const resp = await fetch(BASE_URL + '/me', {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'include'
+            });
+            if (resp.status !== 200) throw new Error(resp.statusText);
+            const {data} = await resp.json();
+            dispatch({
+                type: SET_ME_SUCCESS,
+                me: {
+                    data
+                }
+            });
+
+        } catch (error) {
+            dispatch({
+                type: SET_ME_ERROR,
+                me: {
+                    me,
+                    error
+                }
+            });
+            return false;
         }
-    }
+
+        return true;
+    };
 }

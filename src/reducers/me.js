@@ -1,18 +1,18 @@
 import {
-    ME_REQUEST,
-    ME_SUCCESS,
-    ME_FAILURE
+    SET_ME_START,
+    SET_ME_SUCCESS,
+    SET_ME_ERROR,
 } from '../constants'
 
 
 
-function me(state = {
-    isFetching: false,
-    quote: '',
-    isAuthenticated: false
-}, action) {
+export defaault function me(state = null, action) {
+    if (state === null) {
+        return false;
+    }
+    
     switch (action.type) {
-        case ME_REQUEST:
+        case SET_ME_START:
             return Object.assign({}, state, {
                 isFetching: true
             });

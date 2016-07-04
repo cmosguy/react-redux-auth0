@@ -7,8 +7,6 @@ import {
     BASE_URL
 } from '../constants';
 
-import fetch from '../core/fetch';
-
 function getInitialState() {
     let isAuthenticated = false;
     let me              = null;
@@ -19,33 +17,6 @@ function getInitialState() {
         // Possible solution is dispatch some special action after first render on client.
         if (typeof localStorage !== 'undefined') {
             isAuthenticated = !!localStorage.getItem('id_token');
-            if (isAuthenticated) {
-                let token = localStorage.getItem('id_token');
-
-                (async() => {
-                    try {
-                        console.log('about to fetch /me');
-                        const resp = await fetch(BASE_URL + '/me', {
-                            // headers: {
-                            //     Accept: 'application/json',
-                            //     'Content-Type': 'application/json',
-                            //     'Authorization': `Bearer ${token}`
-                            // },
-                            credentials: 'include',
-                        });
-                        console.log(resp);
-                        if (resp.status !== 200) throw new Error(resp.statusText);
-                        const {data} = await
-                            resp.json();
-                        console.log(res.json());
-                        // if (!data || !data.content) return undefined;
-                        // me = ...data.content;
-                    } catch (e) {
-                        console.log("Booo")
-                    }
-                })();
-
-            }
         }
     }
     return {
