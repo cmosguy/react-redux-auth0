@@ -2,7 +2,11 @@ import React, {PropTypes} from 'react';
 import {connect} from 'react-redux';
 import {setMe} from '../../actions/me';
 
-function Me({isAuthenticated, setMe}) {
+function Me({isAuthenticated, me}) {
+    
+    
+    setMe(null);
+    
 
     return (
         <div>
@@ -10,7 +14,7 @@ function Me({isAuthenticated, setMe}) {
             {JSON.stringify(isAuthenticated)}
         </pre>
             {isAuthenticated &&
-            <p>{me.name}</p>
+            <pre>{JSON.stringify(me)}</pre>
             }
         </div>
     );

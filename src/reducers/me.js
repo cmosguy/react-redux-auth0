@@ -6,26 +6,27 @@ import {
 
 
 
-export defaault function me(state = null, action) {
+export default function me(state = null, action) {
     if (state === null) {
         return false;
     }
     
     switch (action.type) {
         case SET_ME_START:
-            return Object.assign({}, state, {
-                isFetching: true
-            });
-        case ME_SUCCESS:
-            return Object.assign({}, state, {
-                isFetching: false,
-                quote: action.response,
-                isAuthenticated: action.authenticated || false
-            });
-        case ME_FAILURE:
-            return Object.assign({}, state, {
-                isFetching: false
-            });
+            const me = state[action.payload.me] ? action.payload.me : state.me;
+            return {
+                ...state,
+                me
+            };
+        case SET_ME_SUCCESS:
+            return {
+                ...state,
+                me: action.payload.me
+            };
+        case SET_ME_ERROR:
+            return {
+                ...state
+            };
         default:
             return state
     }

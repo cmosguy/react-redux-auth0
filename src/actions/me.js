@@ -10,7 +10,9 @@ export function setMe({me}) {
     return async(dispatch) => {
         dispatch({
             type: SET_ME_START,
-            me
+            payload: {
+                me
+            }
         });
 
         try {
@@ -30,15 +32,15 @@ export function setMe({me}) {
             const {data} = await resp.json();
             dispatch({
                 type: SET_ME_SUCCESS,
-                me: {
-                    data
+                payload: {
+                    me: data
                 }
             });
 
         } catch (error) {
             dispatch({
                 type: SET_ME_ERROR,
-                me: {
+                payload: {
                     me,
                     error
                 }
