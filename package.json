@@ -19,6 +19,7 @@
     "express-graphql": "0.5.1",
     "express-jwt": "3.4.0",
     "express-request-language": "^1.1.4",
+    "extend": "^3.0.0",
     "fastclick": "1.0.6",
     "fbjs": "0.8.2",
     "front-matter": "2.0.7",

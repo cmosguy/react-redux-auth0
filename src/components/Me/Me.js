@@ -27,7 +27,7 @@ Me.propTypes = {
 
 export default connect(state => ({
     isAuthenticated: state.auth.isAuthenticated,
-    me: state.me.me
+    me: state.me
 }), {
     setMe
 })(Me);

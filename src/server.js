@@ -19,19 +19,20 @@ import expressGraphQL from 'express-graphql';
 import jwt from 'jsonwebtoken';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
-import { match } from 'universal-router';
+import {match} from 'universal-router';
 import PrettyError from 'pretty-error';
 import passport from './core/passport';
 import models from './data/models';
 import schema from './data/schema';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
-import { port, auth, analytics, locales } from './config';
+import {port, auth, analytics, locales} from './config';
 import configureStore from './store/configureStore';
-import { setRuntimeVariable } from './actions/runtime';
+import {setRuntimeVariable} from './actions/runtime';
 import Provide from './components/Provide';
-import { setLocale } from './actions/intl';
-import { authOk } from './actions/auth';
+import {setLocale} from './actions/intl';
+import {authOk} from './actions/auth';
+import {setMe} from './actions/me';
 
 const app = express();
 
@@ -39,7 +40,7 @@ const app = express();
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
 // user agent is not known.
 // -----------------------------------------------------------------------------
-global.navigator = global.navigator || {};
+global.navigator           = global.navigator || {};
 global.navigator.userAgent = global.navigator.userAgent || 'all';
 
 //
@@ -48,140 +49,156 @@ global.navigator.userAgent = global.navigator.userAgent || 'all';
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(requestLanguage({
-  languages: locales,
-  queryName: 'lang',
-  cookie: {
-    name: 'lang',
-    options: {
-      path: '/',
-      maxAge: 3650 * 24 * 3600 * 1000, // 10 years in miliseconds
+    languages: locales,
+    queryName: 'lang',
+    cookie: {
+        name: 'lang',
+        options: {
+            path: '/',
+            maxAge: 3650 * 24 * 3600 * 1000, // 10 years in miliseconds
+        },
+        url: '/lang/{language}',
     },
-    url: '/lang/{language}',
-  },
 }));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 //
 // Authentication
 // -----------------------------------------------------------------------------
 app.use(expressJwt({
-  secret: auth.jwt.secret,
-  credentialsRequired: false,
-  /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-  getToken: req => req.cookies.id_token,
-  /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+    secret: auth.jwt.secret,
+    credentialsRequired: false,
+    /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+    getToken: req => req.cookies.id_token,
+    /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 }));
 app.use(passport.initialize());
 
 app.get('/login/facebook',
-  passport.authenticate('facebook', { scope: ['email', 'user_location'], session: false })
+    passport.authenticate('facebook', {scope: ['email', 'user_location'], session: false})
 );
 app.get('/login/facebook/return',
-  passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
-  (req, res) => {
-    const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user, auth.jwt.secret, { expiresIn });
-    res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
-    res.redirect('/');
-  }
+    passport.authenticate('facebook', {failureRedirect: '/login', session: false}),
+    (req, res) => {
+        const expiresIn = 60 * 60 * 24 * 180; // 180 days
+        const token     = jwt.sign(req.user, auth.jwt.secret, {expiresIn});
+        res.cookie('id_token', token, {maxAge: 1000 * expiresIn, httpOnly: true});
+        res.redirect('/');
+    }
 );
 
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
 app.use('/graphql', expressGraphQL(req => ({
-  schema,
-  graphiql: true,
-  rootValue: { request: req },
-  pretty: process.env.NODE_ENV !== 'production',
+    schema,
+    graphiql: true,
+    rootValue: {request: req},
+    pretty: process.env.NODE_ENV !== 'production',
 })));
 
 //
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------
-app.get('*', async (req, res, next) => {
-  try {
-    let css = [];
-    let statusCode = 200;
-    const template = require('./views/index.jade'); // eslint-disable-line global-require
-    const locale = req.language;
-    const data = {
-      lang: locale,
-      title: '',
-      description: '',
-      css: '',
-      body: '',
-      entry: assets.main.js,
-    };
+app.get('*', async(req, res, next) => {
+    try {
+        let css        = [];
+        let statusCode = 200;
+        const template = require('./views/index.jade'); // eslint-disable-line global-require
+        const locale   = req.language;
 
-    if (process.env.NODE_ENV === 'production') {
-      data.trackingId = analytics.google.trackingId;
+        const data = {
+            lang: locale,
+            title: '',
+            description: '',
+            css: '',
+            body: '',
+            entry: assets.main.js,
+        };
+
+        if (process.env.NODE_ENV === 'production') {
+            data.trackingId = analytics.google.trackingId;
+        }
+
+        const store = configureStore({}, {
+            cookie: req.headers.cookie,
+        });
+
+        store.dispatch(setRuntimeVariable({
+            name: 'initialNow',
+            value: Date.now(),
+        }));
+
+        store.dispatch(setRuntimeVariable({
+            name: 'availableLocales',
+            value: locales,
+        }));
+
+        await store.dispatch(setLocale({
+            locale,
+        }));
+
+        // var jwtCheck = jwt.decode(req.cookies.auth0, auth.auth0.client_secret);
+        /*
+         We need to verify if the token has expired is valid before trying to fetch
+         any "me" profiles from the API server
+         */
+
+        try {
+            var decoded = jwt.verify(req.cookies.auth0, new Buffer(auth.auth0.client_secret, 'base64'));
+
+            store.dispatch(authOk({
+                token: req.cookies.auth0,
+                profile: null,
+            }));
+
+            // await store.dispatch(setMe({
+            //     me: null,
+            //     token: req.cookies.auth0
+            // }));
+            
+        } catch (err) {
+            console.log('token error', err);
+        }
+
+        await match(routes, {
+            path: req.path,
+            query: req.query,
+            context: {
+                store,
+                insertCss: styles => css.push(styles._getCss()), // eslint-disable-line no-underscore-dangle
+                setTitle: value => (data.title = value),
+                setMeta: (key, value) => (data[key] = value),
+            },
+            render(component, status = 200) {
+                css        = [];
+                statusCode = status;
+
+                // Fire all componentWill... hooks
+                data.body = ReactDOM.renderToString(<Provide store={store}>{component}</Provide>);
+
+                // If you have async actions, wait for store when stabilizes here.
+                // This may be asynchronous loop if you have complicated structure.
+                // Then render again
+
+                // If store has no changes, you do not need render again!
+                // data.body = ReactDOM.renderToString(<Provide store={store}>{component}</Provide>);
+
+                // It is important to have rendered output and state in sync,
+                // otherwise React will write error to console when mounting on client
+                data.state = JSON.stringify(store.getState());
+
+                data.css = css.join('');
+                return true;
+            },
+        });
+
+        res.status(statusCode);
+        res.send(template(data));
+    } catch (err) {
+        next(err);
     }
-
-    const store = configureStore({}, {
-      cookie: req.headers.cookie,
-    });
-
-    store.dispatch(setRuntimeVariable({
-      name: 'initialNow',
-      value: Date.now(),
-    }));
-
-    store.dispatch(setRuntimeVariable({
-      name: 'availableLocales',
-      value: locales,
-    }));
-
-    await store.dispatch(setLocale({
-      locale,
-    }));
-
-    // fake successful login on server
-    if (req.cookies.auth0) {
-      store.dispatch(authOk({
-        token: req.cookies.auth0,
-        profile: null,
-      }));
-    }
-
-    await match(routes, {
-      path: req.path,
-      query: req.query,
-      context: {
-        store,
-        insertCss: styles => css.push(styles._getCss()), // eslint-disable-line no-underscore-dangle
-        setTitle: value => (data.title = value),
-        setMeta: (key, value) => (data[key] = value),
-      },
-      render(component, status = 200) {
-        css = [];
-        statusCode = status;
-
-        // Fire all componentWill... hooks
-        data.body = ReactDOM.renderToString(<Provide store={store}>{component}</Provide>);
-
-        // If you have async actions, wait for store when stabilizes here.
-        // This may be asynchronous loop if you have complicated structure.
-        // Then render again
-
-        // If store has no changes, you do not need render again!
-        // data.body = ReactDOM.renderToString(<Provide store={store}>{component}</Provide>);
-
-        // It is important to have rendered output and state in sync,
-        // otherwise React will write error to console when mounting on client
-        data.state = JSON.stringify(store.getState());
-
-        data.css = css.join('');
-        return true;
-      },
-    });
-
-    res.status(statusCode);
-    res.send(template(data));
-  } catch (err) {
-    next(err);
-  }
 });
 
 //
@@ -192,14 +209,14 @@ pe.skipNodeFiles();
 pe.skipPackage('express');
 
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-  console.log(pe.render(err)); // eslint-disable-line no-console
-  const template = require('./views/error.jade'); // eslint-disable-line global-require
-  const statusCode = err.status || 500;
-  res.status(statusCode);
-  res.send(template({
-    message: err.message,
-    stack: process.env.NODE_ENV === 'production' ? '' : err.stack,
-  }));
+    console.log(pe.render(err)); // eslint-disable-line no-console
+    const template   = require('./views/error.jade'); // eslint-disable-line global-require
+    const statusCode = err.status || 500;
+    res.status(statusCode);
+    res.send(template({
+        message: err.message,
+        stack: process.env.NODE_ENV === 'production' ? '' : err.stack,
+    }));
 });
 
 //
@@ -207,8 +224,8 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 // -----------------------------------------------------------------------------
 /* eslint-disable no-console */
 models.sync().catch(err => console.error(err.stack)).then(() => {
-  app.listen(port, () => {
-    console.log(`The server is running at http://localhost:${port}/`);
-  });
+    app.listen(port, () => {
+        console.log(`The server is running at http://localhost:${port}/`);
+    });
 });
 /* eslint-enable no-console */

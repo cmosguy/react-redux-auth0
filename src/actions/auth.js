@@ -8,6 +8,8 @@ import {
     BASE_URL
 } from '../constants';
 
+import {auth} from '../config';
+
 export function authOk({token, profile}) {
     return {
         type: AUTH0_OK,
@@ -41,7 +43,7 @@ export function login() {
         require.ensure(['auth0-lock'], require => {
             const Auth0Lock = require('auth0-lock');
 
-            const lock        = new Auth0Lock('xXqbQWihvgXtIECPF6nPzFqWWnfgNOAs', 'adamklein.auth0.com');
+            const lock        = new Auth0Lock(auth.auth0.client_id, auth.auth0.domain);
             const state       = getState();
             const dict        = (state.intl.locale || 'en').match(/^\w+/)[0];
             const lockOptions = {

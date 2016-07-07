@@ -6,7 +6,7 @@ import {
     BASE_URL
 } from '../constants';
 
-export function setMe({me}) {
+export function setMe({me, token}) {
     return async(dispatch) => {
         dispatch({
             type: SET_ME_START,
@@ -16,7 +16,6 @@ export function setMe({me}) {
         });
 
         try {
-            const token = localStorage.getItem('id_token');
             console.log('about to fetch /me');
             const resp = await fetch(BASE_URL + '/me', {
                 method: 'GET',

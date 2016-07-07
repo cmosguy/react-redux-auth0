@@ -64,7 +64,7 @@ function Navigation({ className }) {
         <FormattedMessage {...messages.signup} />
       </Link>
       <Login />
-      <Me/>
+      // <Me/>
         
     </div>
   );
