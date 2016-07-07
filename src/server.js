@@ -153,10 +153,10 @@ app.get('*', async(req, res, next) => {
                 profile: null,
             }));
 
-            // await store.dispatch(setMe({
-            //     me: null,
-            //     token: req.cookies.auth0
-            // }));
+            await store.dispatch(setMe({
+                me: null,
+                token: req.cookies.auth0
+            }));
             
         } catch (err) {
             console.log('token error', err);
