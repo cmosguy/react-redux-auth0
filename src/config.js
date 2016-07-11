@@ -8,7 +8,6 @@
  */
 
 /* eslint-disable max-len */
-/* jscs:disable maximumLineLength */
 
 import extend from 'extend';
 
@@ -21,10 +20,10 @@ export const locales = ['en', 'cs'];
 export const databaseUrl = process.env.DATABASE_URL || 'sqlite:database.sqlite';
 
 export const analytics = {
-
-    // https://analytics.google.com/
-    google: {trackingId: process.env.GOOGLE_TRACKING_ID || 'UA-XXXXX-X'},
-
+  // https://analytics.google.com/
+  google: {
+    trackingId: process.env.GOOGLE_TRACKING_ID || 'UA-XXXXX-X'
+  },
 };
 
 export const auth = {

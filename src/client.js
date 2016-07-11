@@ -15,7 +15,13 @@ import { match } from 'universal-router';
 import routes from './routes';
 import history from './core/history';
 import configureStore from './store/configureStore';
-import { addEventListener, removeEventListener } from './core/DOMUtils';
+import { readState, saveState } from 'history/lib/DOMStateStorage';
+import {
+  addEventListener,
+  removeEventListener,
+  windowScrollX,
+  windowScrollY,
+} from './core/DOMUtils';
 import Provide from './components/Provide';
 
 import { addLocaleData } from 'react-intl';
@@ -28,7 +34,12 @@ import cs from 'react-intl/locale-data/cs';
 
 const context = {
   store: null,
-  insertCss: styles => styles._insertCss(), // eslint-disable-line no-underscore-dangle
+  insertCss: (...styles) => {
+    const removeCss = styles.map(style => style._insertCss()); // eslint-disable-line no-underscore-dangle, max-len
+    return () => {
+      removeCss.forEach(f => f());
+    };
+  },
   setTitle: value => (document.title = value),
   setMeta: (name, content) => {
     // Remove and create a new <meta /> tag in order to make it work
@@ -66,7 +77,9 @@ let renderComplete = (state, callback) => {
 
     // Google Analytics tracking. Don't send 'pageview' event after
     // the initial rendering, as it was already sent
-    window.ga('send', 'pageview');
+    if (window.ga) {
+      window.ga('send', 'pageview');
+    }
 
     callback(true);
   };
@@ -96,13 +109,13 @@ function render(container, state, config, component) {
 }
 
 export default function main() {
-  let currentLocation = null;
   const container = document.getElementById('app');
   const initialState = JSON.parse(
     document.
       getElementById('source').
       getAttribute('data-initial-state')
   );
+  let currentLocation = history.getCurrentLocation();
 
   // Make taps on links and buttons work fast on mobiles
   FastClick.attach(document.body);
@@ -122,7 +135,7 @@ export default function main() {
       query: location.query,
       state: location.state,
       context,
-      render: render.bind(undefined, container, location.state, { store }),
+      render: render.bind(undefined, container, location.state, { store }), // eslint-disable-line react/jsx-no-bind, max-len
     }).catch(err => console.error(err)); // eslint-disable-line no-console
   });
 
