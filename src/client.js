@@ -15,12 +15,12 @@ import { match } from 'universal-router';
 import routes from './routes';
 import history from './core/history';
 import configureStore from './store/configureStore';
-import { readState, saveState } from 'history/lib/DOMStateStorage';
+// import { readState, saveState } from 'history/lib/DOMStateStorage';
 import {
   addEventListener,
   removeEventListener,
-  windowScrollX,
-  windowScrollY,
+  // windowScrollX,
+  // windowScrollY,
 } from './core/DOMUtils';
 import Provide from './components/Provide';
 

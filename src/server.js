@@ -33,8 +33,8 @@ import configureStore from './store/configureStore';
 import Provide from './components/Provide';
 import { setRuntimeVariable } from './actions/runtime';
 import { setLocale } from './actions/intl';
-import { authOk } from './actions/auth';
-import { setMe } from './actions/me';
+// import { authOk } from './actions/auth';
+// import { setMe } from './actions/me';
 import { port, auth, locales } from './config';
 
 const app = express();
@@ -43,7 +43,7 @@ const app = express();
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
 // user agent is not known.
 // -----------------------------------------------------------------------------
-global.navigator           = global.navigator || {};
+global.navigator = global.navigator || {};
 global.navigator.userAgent = global.navigator.userAgent || 'all';
 
 //
@@ -52,18 +52,18 @@ global.navigator.userAgent = global.navigator.userAgent || 'all';
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(requestLanguage({
-    languages: locales,
-    queryName: 'lang',
-    cookie: {
-        name: 'lang',
-        options: {
-            path: '/',
-            maxAge: 3650 * 24 * 3600 * 1000, // 10 years in miliseconds
-        },
-        url: '/lang/{language}',
+  languages: locales,
+  queryName: 'lang',
+  cookie: {
+    name: 'lang',
+    options: {
+      path: '/',
+      maxAge: 3650 * 24 * 3600 * 1000, // 10 years in miliseconds
     },
+    url: '/lang/{language}',
+  },
 }));
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 //
@@ -77,32 +77,32 @@ app.use(expressJwt({
 app.use(passport.initialize());
 
 app.get('/login/facebook',
-    passport.authenticate('facebook', {scope: ['email', 'user_location'], session: false})
+  passport.authenticate('facebook', { scope: ['email', 'user_location'], session: false })
 );
 app.get('/login/facebook/return',
-    passport.authenticate('facebook', {failureRedirect: '/login', session: false}),
-    (req, res) => {
-        const expiresIn = 60 * 60 * 24 * 180; // 180 days
-        const token     = jwt.sign(req.user, auth.jwt.secret, {expiresIn});
-        res.cookie('id_token', token, {maxAge: 1000 * expiresIn, httpOnly: true});
-        res.redirect('/');
-    }
+  passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
+  (req, res) => {
+    const expiresIn = 60 * 60 * 24 * 180; // 180 days
+    const token = jwt.sign(req.user, auth.jwt.secret, { expiresIn });
+    res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
+    res.redirect('/');
+  }
 );
 
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
 app.use('/graphql', expressGraphQL(req => ({
-    schema,
-    graphiql: true,
-    rootValue: {request: req},
-    pretty: process.env.NODE_ENV !== 'production',
+  schema,
+  graphiql: true,
+  rootValue: { request: req },
+  pretty: process.env.NODE_ENV !== 'production',
 })));
 
 //
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------
-app.get('*', async (req, res, next) => {
+app.get('*', async(req, res, next) => {
   try {
     let css = [];
     let statusCode = 200;
@@ -188,6 +188,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   console.log(pe.render(err)); // eslint-disable-line no-console
   const statusCode = err.status || 500;
   const html = ReactDOM.renderToStaticMarkup(
+    // @formatter:off
     <Html
       title="Internal Server Error"
       description={err.message}
@@ -195,6 +196,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     >
       {ReactDOM.renderToString(<ErrorPage error={err} />)}
     </Html>
+    // @formatter:on
   );
   res.status(statusCode);
   res.send(`<!doctype html>${html}`);
@@ -205,8 +207,8 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 // -----------------------------------------------------------------------------
 /* eslint-disable no-console */
 models.sync().catch(err => console.error(err.stack)).then(() => {
-    app.listen(port, () => {
-        console.log(`The server is running at http://localhost:${port}/`);
-    });
+  app.listen(port, () => {
+    console.log(`The server is running at http://localhost:${port}/`);
+  });
 });
 /* eslint-enable no-console */

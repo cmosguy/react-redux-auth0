@@ -13,8 +13,8 @@ import cx from 'classnames';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Navigation.css';
 import Link from '../Link';
-import Login from '../Login';
-import Me from '../Me';
+// import Login from '../Login';
+// import Me from '../Me';
 
 const messages = defineMessages({
   about: {
@@ -46,6 +46,7 @@ const messages = defineMessages({
 
 function Navigation({ className }) {
   return (
+    // @formatter:off
     <div className={cx(s.root, className)} role="navigation">
       <Link className={s.link} to="/about">
         <FormattedMessage {...messages.about} />
@@ -56,16 +57,15 @@ function Navigation({ className }) {
       <span className={s.spacer}> | </span>
       <Link className={s.link} to="/login">
         <FormattedMessage {...messages.login} />
-      </Link>
-      <span className={s.spacer}>
-        <FormattedMessage {...messages.or} />
-      </span>
+      </Link> <span className={s.spacer}>
+        <FormattedMessage {...messages.or} /> </span>
       <Link className={cx(s.link, s.highlight)} to="/register">
         <FormattedMessage {...messages.signup} />
       </Link>
-      <Login />
-      // <Me/>
-        
+      {/* <Login></Login>*/}
+      {/* <Me></Me>*/}
+    // @formatter:on
+
     </div>
   );
 }
