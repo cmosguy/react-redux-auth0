@@ -19,20 +19,23 @@ import expressGraphQL from 'express-graphql';
 import jwt from 'jsonwebtoken';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
-import {match} from 'universal-router';
+import Html from './components/Html';
+import { ErrorPage } from './routes/error/ErrorPage';
+import errorPageStyle from './routes/error/ErrorPage.css';
+import UniversalRouter from 'universal-router';
 import PrettyError from 'pretty-error';
 import passport from './core/passport';
 import models from './data/models';
 import schema from './data/schema';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
-import {port, auth, analytics, locales} from './config';
 import configureStore from './store/configureStore';
-import {setRuntimeVariable} from './actions/runtime';
 import Provide from './components/Provide';
-import {setLocale} from './actions/intl';
-import {authOk} from './actions/auth';
-import {setMe} from './actions/me';
+import { setRuntimeVariable } from './actions/runtime';
+import { setLocale } from './actions/intl';
+import { authOk } from './actions/auth';
+import { setMe } from './actions/me';
+import { port, auth, locales } from './config';
 
 const app = express();
 
@@ -67,11 +70,9 @@ app.use(bodyParser.json());
 // Authentication
 // -----------------------------------------------------------------------------
 app.use(expressJwt({
-    secret: auth.jwt.secret,
-    credentialsRequired: false,
-    /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-    getToken: req => req.cookies.id_token,
-    /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+  secret: auth.jwt.secret,
+  credentialsRequired: false,
+  getToken: req => req.cookies.id_token,
 }));
 app.use(passport.initialize());
 
@@ -101,104 +102,79 @@ app.use('/graphql', expressGraphQL(req => ({
 //
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------
-app.get('*', async(req, res, next) => {
-    try {
-        let css        = [];
-        let statusCode = 200;
-        const template = require('./views/index.jade'); // eslint-disable-line global-require
-        const locale   = req.language;
+app.get('*', async (req, res, next) => {
+  try {
+    let css = [];
+    let statusCode = 200;
+    const locale = req.language;
+    const data = {
+      lang: locale,
+      title: '',
+      description: '',
+      style: '',
+      script: assets.main.js,
+      children: '',
+    };
 
-        const data = {
-            lang: locale,
-            title: '',
-            description: '',
-            css: '',
-            body: '',
-            entry: assets.main.js,
-        };
+    const store = configureStore({}, {
+      cookie: req.headers.cookie,
+    });
 
-        if (process.env.NODE_ENV === 'production') {
-            data.trackingId = analytics.google.trackingId;
-        }
+    store.dispatch(setRuntimeVariable({
+      name: 'initialNow',
+      value: Date.now(),
+    }));
 
-        const store = configureStore({}, {
-            cookie: req.headers.cookie,
-        });
+    store.dispatch(setRuntimeVariable({
+      name: 'availableLocales',
+      value: locales,
+    }));
 
-        store.dispatch(setRuntimeVariable({
-            name: 'initialNow',
-            value: Date.now(),
-        }));
+    await store.dispatch(setLocale({
+      locale,
+    }));
 
-        store.dispatch(setRuntimeVariable({
-            name: 'availableLocales',
-            value: locales,
-        }));
+    await UniversalRouter.resolve(routes, {
+      path: req.path,
+      query: req.query,
+      context: {
+        store,
+        insertCss: (...styles) => {
+          styles.forEach(style => css.push(style._getCss())); // eslint-disable-line no-underscore-dangle, max-len
+        },
+        setTitle: value => (data.title = value),
+        setMeta: (key, value) => (data[key] = value),
+      },
+      render(component, status = 200) {
+        css = [];
+        statusCode = status;
 
-        await store.dispatch(setLocale({
-            locale,
-        }));
+        // Fire all componentWill... hooks
+        data.children = ReactDOM.renderToString(<Provide store={store}>{component}</Provide>);
 
-        // var jwtCheck = jwt.decode(req.cookies.auth0, auth.auth0.client_secret);
-        /*
-         We need to verify if the token has expired is valid before trying to fetch
-         any "me" profiles from the API server
-         */
+        // If you have async actions, wait for store when stabilizes here.
+        // This may be asynchronous loop if you have complicated structure.
+        // Then render again
 
-        try {
-            var decoded = jwt.verify(req.cookies.auth0, new Buffer(auth.auth0.client_secret, 'base64'));
+        // If store has no changes, you do not need render again!
+        // data.children = ReactDOM.renderToString(<Provide store={store}>{component}</Provide>);
 
-            store.dispatch(authOk({
-                token: req.cookies.auth0,
-                profile: null,
-            }));
+        // It is important to have rendered output and state in sync,
+        // otherwise React will write error to console when mounting on client
+        data.state = store.getState();
 
-            await store.dispatch(setMe({
-                me: null,
-                token: req.cookies.auth0
-            }));
-            
-        } catch (err) {
-            console.log('token error', err);
-        }
+        data.style = css.join('');
+        return true;
+      },
+    });
 
-        await match(routes, {
-            path: req.path,
-            query: req.query,
-            context: {
-                store,
-                insertCss: styles => css.push(styles._getCss()), // eslint-disable-line no-underscore-dangle
-                setTitle: value => (data.title = value),
-                setMeta: (key, value) => (data[key] = value),
-            },
-            render(component, status = 200) {
-                css        = [];
-                statusCode = status;
+    const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
 
-                // Fire all componentWill... hooks
-                data.body = ReactDOM.renderToString(<Provide store={store}>{component}</Provide>);
-
-                // If you have async actions, wait for store when stabilizes here.
-                // This may be asynchronous loop if you have complicated structure.
-                // Then render again
-
-                // If store has no changes, you do not need render again!
-                // data.body = ReactDOM.renderToString(<Provide store={store}>{component}</Provide>);
-
-                // It is important to have rendered output and state in sync,
-                // otherwise React will write error to console when mounting on client
-                data.state = JSON.stringify(store.getState());
-
-                data.css = css.join('');
-                return true;
-            },
-        });
-
-        res.status(statusCode);
-        res.send(template(data));
-    } catch (err) {
-        next(err);
-    }
+    res.status(statusCode);
+    res.send(`<!doctype html>${html}`);
+  } catch (err) {
+    next(err);
+  }
 });
 
 //
@@ -209,14 +185,19 @@ pe.skipNodeFiles();
 pe.skipPackage('express');
 
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-    console.log(pe.render(err)); // eslint-disable-line no-console
-    const template   = require('./views/error.jade'); // eslint-disable-line global-require
-    const statusCode = err.status || 500;
-    res.status(statusCode);
-    res.send(template({
-        message: err.message,
-        stack: process.env.NODE_ENV === 'production' ? '' : err.stack,
-    }));
+  console.log(pe.render(err)); // eslint-disable-line no-console
+  const statusCode = err.status || 500;
+  const html = ReactDOM.renderToStaticMarkup(
+    <Html
+      title="Internal Server Error"
+      description={err.message}
+      style={errorPageStyle._getCss()} // eslint-disable-line no-underscore-dangle
+    >
+      {ReactDOM.renderToString(<ErrorPage error={err} />)}
+    </Html>
+  );
+  res.status(statusCode);
+  res.send(`<!doctype html>${html}`);
 });
 
 //
