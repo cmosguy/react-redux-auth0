@@ -45,8 +45,8 @@ const messages = defineMessages({
 });
 
 function Navigation({ className }) {
+  // @formatter:off
   return (
-    // @formatter:off
     <div className={cx(s.root, className)} role="navigation">
       <Link className={s.link} to="/about">
         <FormattedMessage {...messages.about} />
@@ -63,11 +63,11 @@ function Navigation({ className }) {
         <FormattedMessage {...messages.signup} />
       </Link>
       {/* <Login></Login>*/}
-      {/* <Me></Me>*/}
-    // @formatter:on
+       {/* <Me/>*/}
 
     </div>
   );
+    // @formatter:on
 }
 
 Navigation.propTypes = {

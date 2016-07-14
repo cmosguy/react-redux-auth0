@@ -20,7 +20,7 @@ function Me({ isAuthenticated, me }) {
 Me.propTypes = {
   isAuthenticated: PropTypes.bool,
   setMe: PropTypes.func.isRequired,
-  me: PropTypes.func.me,
+  me: PropTypes.bool,
 };
 
 export default connect(state => ({
